@@ -1,0 +1,7 @@
+code,type,description,keywords
+99213,HCPCS,Office or other outpatient visit for the evaluation and management of an established patient,office|visit|evaluation|management|established patient
+99214,HCPCS,Office or other outpatient visit for the evaluation and management of an established patient - moderate complexity,office|visit|evaluation|management|established patient|moderate
+E0601,HCPCS,Continuous airway pressure (CPAP) device,cpap|continuous airway pressure|device
+J01.90,ICD-10,Acute sinusitis, unspecified,acute|sinusitis
+I10,ICD-10,Essential (primary) hypertension,essential|hypertension|primary
+E11.9,ICD-10,Type 2 diabetes mellitus without complications,type 2|diabetes|mellitus

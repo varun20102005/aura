@@ -1,0 +1,89 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15
+        env:
+          POSTGRES_USER: aura
+          POSTGRES_PASSWORD: aurapass
+          POSTGRES_DB: auradb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies for OCR
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr libtesseract-dev libgl1-mesa-glx
+
+      - name: Install Python dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        env:
+          # Use PostgreSQL for testing to allow concurrency tests to run successfully
+          DATABASE_URL: postgresql://aura:aurapass@localhost:5432/auradb
+          JWT_SECRET_KEY: test_secret_key_only_for_ci
+        run: |
+          pytest tests/ -v
+
+  frontend-test-and-build:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Linting (Oxlint)
+        working-directory: ./frontend
+        run: npm run lint
+        continue-on-error: true # Non-blocking if it just warns
+
+      - name: Run Frontend Tests
+        working-directory: ./frontend
+        run: npm run test
+
+      - name: Build Frontend for Production
+        working-directory: ./frontend
+        run: npm run build

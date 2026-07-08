@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://aura:aurapass@postgres:5432/auradb
+      - JWT_SECRET=dev_secret_please_change_in_production
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  postgres:
+    image: pgvector/pgvector:pg15
+    environment:
+      - POSTGRES_USER=aura
+      - POSTGRES_PASSWORD=aurapass
+      - POSTGRES_DB=auradb
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aura"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

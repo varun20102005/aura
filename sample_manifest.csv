@@ -1,0 +1,3 @@
+patient_ref,provider_ref,procedure_code,billed_amount,document_filename
+PAT-1234,PRV-5678,99213,150.00,1CR23AD034_CHIK...
+PAT-5678,PRV-1234,99214,200.00,another_doc.pdf

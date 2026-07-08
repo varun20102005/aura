@@ -1,0 +1,14 @@
+{
+  "99213": {
+    "description": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused history; An expanded problem focused examination; Medical decision making of low complexity.",
+    "keywords": ["outpatient", "established", "expanded", "low complexity"]
+  },
+  "99214": {
+    "description": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed history; A detailed examination; Medical decision making of moderate complexity.",
+    "keywords": ["outpatient", "established", "detailed", "moderate complexity"]
+  },
+  "11111": {
+    "description": "Test procedure code for rare frequency testing.",
+    "keywords": ["test", "rare"]
+  }
+}

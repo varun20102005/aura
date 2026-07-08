@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Premium Dark Theme Variables */
+  --aura-bg: #0b0f19; /* Deep dark navy */
+  --aura-surface: rgba(30, 41, 59, 0.7); /* Translucent surface */
+  --aura-surface-hover: rgba(30, 41, 59, 0.9);
+  --aura-border: rgba(255, 255, 255, 0.08);
+  --aura-border-focus: rgba(59, 130, 246, 0.5);
+  
+  --aura-text-primary: #f8fafc;
+  --aura-text-secondary: #94a3b8;
+  --aura-text-muted: #64748b;
+  
+  --aura-accent: #3b82f6; /* Electric Blue */
+  --aura-accent-hover: #2563eb;
+  --aura-accent-glow: rgba(59, 130, 246, 0.3);
+  
+  --aura-danger: #ef4444;
+  --aura-warning: #eab308;
+  --aura-success: #10b981;
+  
+  --aura-font: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --aura-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --aura-radius: 12px;
+  --aura-radius-sm: 8px;
+  --aura-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--aura-font);
+  background-color: var(--aura-bg);
+  color: var(--aura-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* =========================================
+   Layout Components
+========================================= */
+
+.aura-layout-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.aura-sidebar {
+  width: 260px;
+  background-color: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--aura-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.aura-sidebar-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--aura-border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+}
+
+.aura-brand {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, #fff 0%, var(--aura-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.aura-nav {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aura-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--aura-radius-sm);
+  color: var(--aura-text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--aura-transition);
+}
+
+.aura-nav-item:hover {
+  background-color: var(--aura-surface);
+  color: var(--aura-text-primary);
+}
+
+.aura-nav-item.active {
+  background-color: var(--aura-accent-glow);
+  color: var(--aura-accent);
+  border-left: 3px solid var(--aura-accent);
+}
+
+/* =========================================
+   Main Content Area
+========================================= */
+
+.aura-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: radial-gradient(circle at top right, rgba(59,130,246,0.05), transparent 400px);
+}
+
+.aura-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background-color: rgba(11, 15, 25, 0.6);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--aura-border);
+  z-index: 5;
+}
+
+.aura-page-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.aura-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.aura-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--aura-accent), #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 0 15px var(--aura-accent-glow);
+  cursor: pointer;
+}
+
+.aura-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+/* =========================================
+   UI Elements
+========================================= */
+
+/* Cards (Glassmorphism) */
+.aura-card {
+  background: var(--aura-surface);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius);
+  padding: 24px;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--aura-shadow);
+  transition: var(--aura-transition);
+}
+
+.aura-card:hover {
+  background: var(--aura-surface-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Dashboard Grid */
+.aura-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.aura-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aura-stat-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--aura-text-secondary);
+  font-weight: 600;
+}
+
+.aura-stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--aura-text-primary);
+}
+.aura-stat-value.danger { color: var(--aura-danger); }
+.aura-stat-value.warning { color: var(--aura-warning); }
+.aura-stat-value.success { color: var(--aura-success); }
+
+/* Typography */
+.aura-h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--aura-text-primary);
+}
+
+.aura-text-muted {
+  color: var(--aura-text-secondary);
+}
+
+/* Buttons */
+.aura-button {
+  background-color: var(--aura-surface);
+  border: 1px solid var(--aura-border);
+  color: var(--aura-text-primary);
+  padding: 8px 16px;
+  border-radius: var(--aura-radius-sm);
+  font-family: var(--aura-font);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--aura-transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.aura-button:hover {
+  background-color: var(--aura-surface-hover);
+  border-color: var(--aura-text-secondary);
+}
+
+.aura-button.primary {
+  background-color: var(--aura-accent);
+  border-color: var(--aura-accent);
+  color: white;
+  box-shadow: 0 4px 15px var(--aura-accent-glow);
+}
+
+.aura-button.primary:hover {
+  background-color: var(--aura-accent-hover);
+  box-shadow: 0 6px 20px var(--aura-accent-glow);
+  transform: translateY(-1px);
+}
+
+/* Tables */
+.aura-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--aura-radius-sm);
+  border: 1px solid var(--aura-border);
+  background: var(--aura-surface);
+}
+
+.aura-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.aura-table th {
+  padding: 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--aura-text-secondary);
+  border-bottom: 1px solid var(--aura-border);
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.aura-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--aura-border);
+  color: var(--aura-text-primary);
+  font-size: 14px;
+}
+
+.aura-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.aura-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badges */
+.aura-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.aura-badge.high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.aura-badge.medium {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.aura-badge.low {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Forms */
+.aura-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-sm);
+  padding: 10px 14px;
+  color: var(--aura-text-primary);
+  font-family: var(--aura-font);
+  width: 100%;
+  transition: var(--aura-transition);
+}
+
+.aura-input:focus {
+  outline: none;
+  border-color: var(--aura-accent);
+  box-shadow: 0 0 0 2px var(--aura-accent-glow);
+}
+
+.aura-form-group {
+  margin-bottom: 20px;
+}
+
+.aura-form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--aura-text-secondary);
+}
+
+/* Flex utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.mt-4 { margin-top: 16px; }
+.mt-8 { margin-top: 32px; }
+.mb-4 { margin-bottom: 16px; }
+
+/* Notification Dropdown */
+.aura-notification-panel {
+  position: relative;
+}
+
+.aura-notification-btn {
+  background: transparent;
+  border: none;
+  color: var(--aura-text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: var(--aura-transition);
+  position: relative;
+}
+
+.aura-notification-btn:hover {
+  background: var(--aura-surface);
+  color: var(--aura-text-primary);
+}
+
+.aura-notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--aura-danger);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--aura-danger);
+}
+
+.aura-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: var(--aura-bg);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  z-index: 50;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+}
+
+.aura-dropdown-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--aura-border);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.aura-notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.aura-notification-item {
+  padding: 16px;
+  border-bottom: 1px solid var(--aura-border);
+  cursor: pointer;
+  transition: var(--aura-transition);
+}
+
+.aura-notification-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.aura-notification-item.unread {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 2px solid var(--aura-accent);
+}
