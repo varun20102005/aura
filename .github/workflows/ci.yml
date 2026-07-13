@@ -39,7 +39,7 @@ jobs:
       - name: Install system dependencies for OCR
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr libtesseract-dev libgl1-mesa-glx
+          sudo apt-get install -y tesseract-ocr libtesseract-dev libgl1
 
       - name: Install Python dependencies
         working-directory: ./backend
