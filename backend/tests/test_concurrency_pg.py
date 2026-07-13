@@ -40,10 +40,10 @@ def test_concurrent_claim_submissions():
         
     assert len(results) == num_claims
     
-def add_note_concurrently(claim_id, note_text):
+def add_note_concurrently(claim_id, note_text, author_id):
     db = SessionLocal()
     try:
-        new_note = InvestigationNote(claim_id=claim_id, author_id=1, note_text=note_text)
+        new_note = InvestigationNote(claim_id=claim_id, author_id=author_id, note_text=note_text)
         db.add(new_note)
         db.commit()
         return True
@@ -55,10 +55,13 @@ def test_concurrent_note_creation():
     db = SessionLocal()
     
     from app.models.core import User
-    u = db.query(User).filter_by(id=1).first()
-    if not u:
-        u = User(id=1, email="test_author@test.com", hashed_password="pw", role="Officer")
-        db.add(u)
+    import uuid
+    rand_email = f"test_{uuid.uuid4().hex[:6]}@test.com"
+    u = User(email=rand_email, hashed_password="pw", role="Officer")
+    db.add(u)
+    db.commit()
+    db.refresh(u)
+    author_id = u.id
     
     c = Claim(patient_ref="PAT_NOTE", provider_ref="PRV", procedure_code="123", billed_amount=100)
     db.add(c)
@@ -70,7 +73,7 @@ def test_concurrent_note_creation():
     num_notes = 20
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         futures = [
-            executor.submit(add_note_concurrently, claim_id, f"Note {i}")
+            executor.submit(add_note_concurrently, claim_id, f"Note {i}", author_id)
             for i in range(num_notes)
         ]
         results = [f.result() for f in concurrent.futures.as_completed(futures)]
