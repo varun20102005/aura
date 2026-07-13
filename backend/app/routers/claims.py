@@ -261,7 +261,7 @@ def get_similar_claims(
     return results[:limit]
 
 @router.get("/{claim_id}/risk-aggregate")
-def get_risk_aggregate(claim_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(["Admin", "Investigator", "Auditor", "Supervisor", "Officer"]))):
+def get_risk_aggregate(claim_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(["Admin", "Investigator", "Auditor", "Supervisor"]))):
     from ..models.core import RiskAggregate, RiskThresholdConfig
     from ..services.aggregation_service import get_active_weights
     

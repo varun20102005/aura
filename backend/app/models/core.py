@@ -42,6 +42,7 @@ class ClaimDocument(Base):
     file_path = Column(String, nullable=False)
     ocr_text = Column(Text)
     ocr_confidence = Column(Float)
+    validation_report = Column(JSON, nullable=True)
 
     claim = relationship("Claim", back_populates="document")
 
@@ -163,6 +164,7 @@ class RiskAggregate(Base):
     provider_score = Column(Float, nullable=False, default=0.0)
     aggregate_score = Column(Float, nullable=False, default=0.0)
     weighting_version = Column(String, nullable=False)
+    evidence_coverage = Column(Float, nullable=True, default=0.0)
     
     claim = relationship("Claim", backref="risk_aggregate")
 

@@ -97,7 +97,7 @@ def check_rare_combination(db: Session, claim: Claim) -> ProcedureValidationFlag
 def run_procedure_validation(db: Session, claim_id: int):
     claim = db.query(Claim).filter_by(id=claim_id).first()
     if not claim:
-        return
+        return {}
 
     # Clear any existing flags for this claim to prevent duplicates on re-processing
     db.query(ProcedureValidationFlag).filter_by(claim_id=claim_id).delete()
@@ -121,3 +121,13 @@ def run_procedure_validation(db: Session, claim_id: int):
     
     db.commit()
     logger.info(f"Procedure validation generated {len(flags)} flags for claim {claim_id}.")
+    
+    # Return structured ML features
+    features = {
+        "procedure_valid": 1 if not f1 else 0,
+        "procedure_match_score": 1.0 if not f2 else 0.0, # Could be improved by partial match logic
+        "procedure_confidence": 1.0 if not f1 and not f2 else 0.5,
+        "rare_provider_combination": 1 if f3 else 0
+    }
+    
+    return features

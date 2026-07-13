@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aegis Command | Enterprise Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#312e81", // Deep Indigo
+                    "on-primary": "#ffffff",
+                    "primary-container": "#e0e7ff",
+                    "secondary": "#64748b", // Slate Gray
+                    "surface": "#ffffff",
+                    "background": "#f8fafc",
+                    "on-surface": "#1e293b", // Deep Charcoal
+                    "on-surface-variant": "#64748b",
+                    "outline": "#e2e8f0",
+                    "error": "#ef4444",
+                    "success": "#10b981",
+                    "tertiary": "#f59e0b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.375rem",
+                    "lg": "0.5rem",
+                    "xl": "1rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-desktop": "40px",
+                    "stack-lg": "40px",
+                    "gutter": "32px",
+                    "container-padding-mobile": "20px",
+                    "stack-sm": "12px",
+                    "unit": "4px",
+                    "stack-md": "20px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "value-bold": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "value-bold": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .soft-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .soft-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            border-color: #cbd5e1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-on-surface">
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col z-50 bg-white border-r border-outline py-stack-lg">
+<div class="px-8 mb-12">
+<h1 class="font-headline-md text-headline-md font-black text-primary tracking-tighter">Aegis</h1>
+<p class="font-label-caps text-[10px] text-on-surface-variant tracking-widest uppercase">Admin Console</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 bg-primary-container text-primary border-r-4 border-primary px-8 py-3.5 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-value-bold text-body-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-primary hover:bg-slate-50 px-8 py-3.5 transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:translate-x-1 transition-transform">monitoring</span>
+<span class="font-body-md text-body-sm">Analytics</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-primary hover:bg-slate-50 px-8 py-3.5 transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:translate-x-1 transition-transform">security</span>
+<span class="font-body-md text-body-sm">Security</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-primary hover:bg-slate-50 px-8 py-3.5 transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:translate-x-1 transition-transform">inventory_2</span>
+<span class="font-body-md text-body-sm">Assets</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-primary hover:bg-slate-50 px-8 py-3.5 transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:translate-x-1 transition-transform">settings</span>
+<span class="font-body-md text-body-sm">Settings</span>
+</a>
+</nav>
+<div class="px-8 mt-auto space-y-6">
+<button class="w-full bg-primary text-on-primary font-value-bold text-body-sm py-3.5 rounded-xl hover:shadow-lg active:scale-95 transition-all">
+                New Report
+            </button>
+<div class="pt-6 border-t border-outline space-y-2">
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface py-2.5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">contact_support</span>
+<span class="font-body-sm">Support</span>
+</a>
+<a class="flex items-center gap-3 text-error hover:text-red-600 py-2.5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-body-sm">Log Out</span>
+</a>
+</div>
+</div>
+</aside>
+<main class="ml-64 min-h-screen flex flex-col">
+<header class="w-full h-20 sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-outline flex items-center justify-between px-container-padding-desktop">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-slate-50 border border-outline rounded-full py-2.5 pl-11 pr-4 text-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-slate-400" placeholder="Search system resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<button class="relative text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0.5 right-0.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-10 w-px bg-outline"></div>
+<div class="flex items-center gap-4">
+<div class="text-right hidden sm:block">
+<p class="font-value-bold text-body-sm text-on-surface leading-tight">Alex Rivera</p>
+<p class="font-label-caps text-[10px] text-on-surface-variant tracking-wider uppercase">Systems Arch</p>
+</div>
+<div class="w-10 h-10 rounded-full ring-2 ring-slate-100 p-0.5 overflow-hidden">
+<img class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjqZkqV7fim-CeNI-3voiVxyLfllMedVl8CsJHvltbj1Tth5AXLuvG3caSZOId6GBIiEp3PdA0UfyJfZ9bw6nhvRjfTtziEu1L5hly8_CBjhecauQyorCTvR2dulXYZoM4IFV_bqSyH6Ght1_5dgdxgfWjMEzArhaonLK1BHv1eGFaMjdkwaXMskYRlFp_bacE2n__B24tgcV5ODrs_6Ws-BLzMbwdL1_urAekYHSXddv0rkVC-SXM"/>
+</div>
+</div>
+</div>
+</header>
+<section class="p-container-padding-desktop space-y-gutter">
+<div class="flex items-end justify-between">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">System Overview</h2>
+<p class="font-body-md text-on-surface-variant">Real-time heuristics and node performance data.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-outline bg-white text-on-surface font-label-caps text-[11px] hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filter
+                    </button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-outline text-on-surface font-label-caps text-[11px] hover:border-primary transition-all">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        Last 24h
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="soft-card p-8 rounded-xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-6">
+<div class="p-3 rounded-xl bg-primary/5 text-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="font-value-bold text-body-sm text-success">+12.5%</span>
+</div>
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2 uppercase tracking-widest">Total Revenue</p>
+<h3 class="font-display-lg text-headline-lg text-on-surface">$2.4M</h3>
+<div class="mt-6 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/4 rounded-full"></div>
+</div>
+</div>
+<div class="soft-card p-8 rounded-xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-6">
+<div class="p-3 rounded-xl bg-slate-100 text-slate-600">
+<span class="material-symbols-outlined">lan</span>
+</div>
+<span class="font-label-caps text-[10px] text-success font-bold uppercase">Stable</span>
+</div>
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2 uppercase tracking-widest">Active Nodes</p>
+<h3 class="font-display-lg text-headline-lg text-on-surface">1,024</h3>
+<div class="mt-6 flex gap-1.5">
+<div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+<div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+<div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+<div class="h-1.5 flex-1 bg-slate-100 rounded-full"></div>
+</div>
+</div>
+<div class="soft-card p-8 rounded-xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-6">
+<div class="p-3 rounded-xl bg-success/5 text-success">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<span class="font-label-caps text-[10px] text-success font-bold uppercase">Optimal</span>
+</div>
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2 uppercase tracking-widest">System Health</p>
+<h3 class="font-display-lg text-headline-lg text-on-surface">98.2%</h3>
+<div class="mt-6">
+<div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-success w-[98%] rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="soft-card p-8 rounded-xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-6">
+<div class="p-3 rounded-xl bg-error/5 text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gpp_maybe</span>
+</div>
+<span class="font-label-caps text-[10px] text-success font-bold uppercase">Secured</span>
+</div>
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2 uppercase tracking-widest">Security Threats</p>
+<h3 class="font-display-lg text-headline-lg text-on-surface">0</h3>
+<p class="font-body-sm text-on-surface-variant mt-2">All firewalls active</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<div class="lg:col-span-2 soft-card rounded-xl overflow-hidden flex flex-col">
+<div class="p-8 border-b border-outline flex items-center justify-between bg-slate-50/50">
+<h3 class="font-value-bold text-value-bold text-on-surface flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">history</span>
+                            Recent Activity
+                        </h3>
+<button class="text-primary font-label-caps text-[11px] font-bold hover:underline">Export CSV</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-outline bg-slate-50/30">
+<th class="px-8 py-5 font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Timestamp</th>
+<th class="px-8 py-5 font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Entity</th>
+<th class="px-8 py-5 font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Action</th>
+<th class="px-8 py-5 font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline">
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-8 py-5 font-body-sm text-on-surface-variant">Oct 24, 14:32:01</td>
+<td class="px-8 py-5 font-value-bold text-body-sm text-on-surface">Node_Alpha_7</td>
+<td class="px-8 py-5 font-body-sm text-on-surface">Memory Optimization</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success font-label-caps text-[10px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> COMPLETE
+                                        </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-8 py-5 font-body-sm text-on-surface-variant">Oct 24, 14:30:15</td>
+<td class="px-8 py-5 font-value-bold text-body-sm text-on-surface">User: j_smith</td>
+<td class="px-8 py-5 font-body-sm text-on-surface">Access Log: DC-04</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-label-caps text-[10px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> AUTHORIZED
+                                        </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-8 py-5 font-body-sm text-on-surface-variant">Oct 24, 14:28:44</td>
+<td class="px-8 py-5 font-value-bold text-body-sm text-on-surface">Cloud_Gateway</td>
+<td class="px-8 py-5 font-body-sm text-on-surface">Traffic Reroute</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary/10 text-tertiary font-label-caps text-[10px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> PENDING
+                                        </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-8 py-5 font-body-sm text-on-surface-variant">Oct 24, 14:25:00</td>
+<td class="px-8 py-5 font-value-bold text-body-sm text-on-surface">System_Kernel</td>
+<td class="px-8 py-5 font-body-sm text-on-surface">Auto-Backup</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success font-label-caps text-[10px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> COMPLETE
+                                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="soft-card rounded-xl overflow-hidden p-8 space-y-8">
+<h3 class="font-value-bold text-value-bold text-on-surface">Node Geolocation</h3>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-900 border border-outline relative">
+<div class="absolute inset-0 grayscale opacity-60">
+<div class="w-full h-full bg-cover bg-center" data-alt="Global network map" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNPcXLG2oKX9xMS141mELcWyrgp0filLVBtrQRnHPovVKkM1H6WxbChK6NUF_1Yi63Q0KUnyyVoJ0cAmTUzEyysBnZ2r-OZkDvYzzexzgEpukay8gxDTPlTRq-Wi5Jd4PFjPIUWx1xBSp9ro5wDWj2JUKRHBVfIphIQvCyOln-x32zdMcezuknwo0jV_zN5VdOiRWJf5hjoe-dfHsaZIM4SHXs9Gasz0wmjVxHAQ_3bK0Ou2YcM9SM')"></div>
+</div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<div class="w-6 h-6 bg-primary/40 rounded-full animate-ping opacity-75"></div>
+<div class="w-3 h-3 bg-primary rounded-full absolute top-1.5 left-1.5 ring-2 ring-white"></div>
+</div>
+<div class="absolute bottom-6 left-6 right-6 p-5 bg-white/95 shadow-xl rounded-xl border border-outline">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1 uppercase tracking-widest">Primary Instance</p>
+<p class="font-value-bold text-body-sm text-on-surface">Frankfurt, DE (EU-West-1)</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="text-[10px] font-bold font-label-caps text-success uppercase">Active</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-on-surface-variant">Global Latency</span>
+<span class="font-value-bold text-body-sm text-primary">24ms</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/4 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<footer class="mt-auto py-10 px-container-padding-desktop border-t border-outline flex flex-col md:flex-row justify-between items-center gap-6 text-on-surface-variant bg-white">
+<div class="flex items-center gap-8">
+<span class="font-label-caps text-[10px] tracking-widest">© 2024 AEGIS COMMAND SOLUTIONS</span>
+<a class="font-label-caps text-[10px] hover:text-primary transition-colors tracking-widest" href="#">PRIVACY POLICY</a>
+<a class="font-label-caps text-[10px] hover:text-primary transition-colors tracking-widest" href="#">SECURITY AUDIT</a>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-success/5 border border-success/20">
+<span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+<span class="font-label-caps text-[10px] font-bold text-success uppercase tracking-wider">All Systems Operational</span>
+</div>
+<p class="font-label-caps text-[10px] tracking-widest font-medium">v2.4.12-STABLE</p>
+</div>
+</footer>
+</main>
+<div class="fixed bottom-10 right-10 z-50">
+<button class="w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:scale-90 transition-all group">
+<span class="material-symbols-outlined text-[32px] group-hover:rotate-12 transition-transform">bolt</span>
+</button>
+</div>
+<script>
+        // Simple scale effects for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-95');
+            });
+        });
+    </script>
+</body></html>

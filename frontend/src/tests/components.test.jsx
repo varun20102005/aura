@@ -19,12 +19,13 @@ describe('NotificationsPanel Component', () => {
       { id: 1, type: 'assignment', payload: { message: 'New case' }, created_at: '2023-01-01', read_at: null }
     ];
     api.get.mockResolvedValueOnce({ data: mockNotifications });
+    localStorage.setItem('token', 'dummy_token');
 
     render(<NotificationsPanel />);
 
     // Wait for badge to appear indicating unread count
     await waitFor(() => {
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByTitle('1 unread')).toBeInTheDocument();
     });
 
     // Click bell to open panel
@@ -42,8 +43,8 @@ describe('BulkUpload Component', () => {
 
   it('renders upload instructions', () => {
     render(<BulkUpload />);
-    expect(screen.getByText('1. Upload CSV Manifest')).toBeInTheDocument();
-    expect(screen.getByText('2. Upload Documents')).toBeInTheDocument();
-    expect(screen.getByText('Submit Batch')).toBeDisabled();
+    expect(screen.getByText('Patient Reference')).toBeInTheDocument();
+    expect(screen.getByText('Provider Reference')).toBeInTheDocument();
+    expect(screen.getByText('Submit Claim')).toBeInTheDocument();
   });
 });

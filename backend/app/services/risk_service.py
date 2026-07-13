@@ -66,3 +66,39 @@ def update_all_provider_risk_profiles(db: Session):
         
     db.commit()
     logger.info(f"Updated {count} provider risk profiles.")
+
+def get_claim_provider_features(db: Session, claim_id: int):
+    claim = db.query(Claim).filter_by(id=claim_id).first()
+    if not claim or not claim.provider_ref:
+        return {}
+        
+    # Get the latest profile
+    profile = db.query(ProviderRiskProfile).filter_by(provider_id=claim.provider_ref).first()
+    
+    # Calculate real-time claim volume (how many claims they've ever submitted)
+    volume = db.query(func.count(Claim.id)).filter_by(provider_ref=claim.provider_ref).scalar()
+    
+    features = {
+        "provider_risk_score": 0.0,
+        "provider_history_count": 0,
+        "provider_claim_volume": volume or 0,
+        "provider_high_risk_rate": 0.0,
+        "provider_confidence": 0.0,
+        "provider_status": 0 # 1 if known, 0 if new
+    }
+    
+    if profile and profile.verified_outcomes_count > 0:
+        features["provider_risk_score"] = profile.rolling_risk_score
+        features["provider_history_count"] = profile.verified_outcomes_count
+        features["provider_high_risk_rate"] = profile.rolling_risk_score # approximation for high risk rate
+        features["provider_status"] = 1
+        
+        # Confidence based on history count (e.g. > 10 is high confidence)
+        if profile.verified_outcomes_count > 20:
+            features["provider_confidence"] = 1.0
+        elif profile.verified_outcomes_count > 5:
+            features["provider_confidence"] = 0.5
+        else:
+            features["provider_confidence"] = 0.2
+            
+    return features

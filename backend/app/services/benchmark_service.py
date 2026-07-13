@@ -114,3 +114,32 @@ def get_best_benchmark(db: Session, procedure_code: str, provider_id: str = None
         procedure_code=procedure_code, region=None, provider_id=None
     ).first()
     return b3
+
+def get_claim_benchmark_features(db: Session, claim_id: int):
+    claim = db.query(Claim).filter_by(id=claim_id).first()
+    if not claim:
+        return {}
+        
+    benchmark = get_best_benchmark(db, claim.procedure_code, claim.provider_ref, "UNKNOWN")
+    
+    features = {
+        "expected_cost": 0.0,
+        "actual_cost": claim.billed_amount or 0.0,
+        "deviation_percentage": 0.0,
+        "benchmark_confidence": 0.0, # 0.0 to 1.0 mapping
+        "benchmark_status": 0 # 1 if found, 0 if missing
+    }
+    
+    if benchmark and benchmark.median > 0:
+        features["expected_cost"] = benchmark.median
+        features["deviation_percentage"] = (claim.billed_amount - benchmark.median) / benchmark.median
+        features["benchmark_status"] = 1
+        
+        if benchmark.confidence == "High":
+            features["benchmark_confidence"] = 1.0
+        elif benchmark.confidence == "Medium":
+            features["benchmark_confidence"] = 0.66
+        else:
+            features["benchmark_confidence"] = 0.33
+            
+    return features

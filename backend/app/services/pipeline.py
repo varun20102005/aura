@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from sqlalchemy.orm import Session
-from ..models.core import Claim, ClaimDocument, ModelScore, ShapExplanation, DuplicateMatch, AuditLog, GraphRelationship
+from ..models.core import Claim, ClaimDocument, ModelScore, ShapExplanation, DuplicateMatch, AuditLog, GraphRelationship, RiskAggregate
 from ..config import settings
 import logging
 
@@ -91,6 +91,84 @@ def process_claim_pipeline_task(claim_id: int):
     finally:
         db.close()
 
+def _run_xgboost(db_path, claim_id, feat_dict):
+    # Using local session if needed, but since we just do inference, no DB needed if models are loaded.
+    from ..database import SessionLocal
+    db = SessionLocal()
+    try:
+        xgb_model, _ = _load_model_from_registry(db, "xgboost", "ml_models/xgboost_fraud.json")
+        features = _get_model_features()
+        # Filter feat_dict to ONLY what the model expects
+        filtered_feat = {f: feat_dict.get(f, 0) for f in features}
+        
+        # OHE for procedure code
+        proc_code = feat_dict.get("procedure_code")
+        if proc_code:
+            proc_col = f"procedure_code_{proc_code}"
+            if proc_col in filtered_feat:
+                filtered_feat[proc_col] = 1
+                
+        df_feat = pd.DataFrame([filtered_feat])
+        score = float(xgb_model.predict_proba(df_feat)[0][1])
+        
+        # Calculate SHAP locally as well to avoid passing huge model back
+        explainer = shap.TreeExplainer(xgb_model)
+        shap_vals = explainer.shap_values(df_feat)
+        shap_res = [(features[i], float(shap_vals[0][i])) for i in range(len(features)) if abs(float(shap_vals[0][i])) > 0.01]
+        
+        return {"type": "xgboost", "score": score, "shap": shap_res, "df": df_feat}
+    finally:
+        db.close()
+
+def _run_isolation_forest(db_path, claim_id, feat_dict):
+    from ..database import SessionLocal
+    db = SessionLocal()
+    try:
+        iso_model, _ = _load_model_from_registry(db, "isolation_forest", "ml_models/isolation_forest.joblib")
+        features = _get_model_features()
+        filtered_feat = {f: feat_dict.get(f, 0) for f in features}
+        
+        proc_code = feat_dict.get("procedure_code")
+        if proc_code:
+            proc_col = f"procedure_code_{proc_code}"
+            if proc_col in filtered_feat:
+                filtered_feat[proc_col] = 1
+                
+        df_feat = pd.DataFrame([filtered_feat])
+        score = float(iso_model.decision_function(df_feat)[0])
+        return {"type": "isolation_forest", "score": score}
+    finally:
+        db.close()
+
+def _run_graph(db_path, claim_id, patient_ref, provider_ref):
+    from ..database import SessionLocal
+    db = SessionLocal()
+    try:
+        G = nx.Graph()
+        G.add_edge(patient_ref, provider_ref, claim_id=claim_id)
+        
+        rel = GraphRelationship(
+            entity_1=patient_ref, 
+            entity_2=provider_ref, 
+            relationship_type="PATIENT_PROVIDER", 
+            metadata_json={"claim_id": claim_id}
+        )
+        db.add(rel)
+        db.commit()
+        return {"type": "graph", "status": "success"}
+    finally:
+        db.close()
+
+def _run_embedding(db_path, claim_id):
+    from ..database import SessionLocal
+    from .embedding_service import generate_claim_embedding
+    db = SessionLocal()
+    try:
+        generate_claim_embedding(db, claim_id)
+        return {"type": "embedding", "status": "success"}
+    finally:
+        db.close()
+
 def process_claim_pipeline(claim_id: int, db: Session):
     claim = db.query(Claim).filter(Claim.id == claim_id).first()
     if not claim:
@@ -98,7 +176,7 @@ def process_claim_pipeline(claim_id: int, db: Session):
     
     doc = db.query(ClaimDocument).filter(ClaimDocument.claim_id == claim_id).first()
     
-    # 1. OCR
+    # 1. OCR (Stage 1)
     try:
         if doc and doc.file_path:
             text, conf = run_ocr(doc.file_path)
@@ -111,108 +189,100 @@ def process_claim_pipeline(claim_id: int, db: Session):
         db.commit()
         return
 
-    # 2. ML Inference (XGBoost & Isolation Forest)
+    # 2. Feature Engineering (Includes Validation, Duplicates, Benchmarks, Provider Risk)
+    from .feature_engineering import build_consolidated_features
     try:
-        xgb_model, xgb_path = _load_model_from_registry(db, "xgboost", "ml_models/xgboost_fraud.json")
-        iso_model, iso_path = _load_model_from_registry(db, "isolation_forest", "ml_models/isolation_forest.joblib")
-        features = _get_model_features()
+        consolidated_features = build_consolidated_features(db, claim_id)
+    except Exception as e:
+        logger.error(f"Feature engineering failed: {e}")
+        consolidated_features = {"billed_amount": claim.billed_amount, "procedure_code": claim.procedure_code}
+
+    # 3. Parallel AI Execution
+    import concurrent.futures
+    results = []
+    
+    # Using dummy string since db connection is created inside threads
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        f_xgb = executor.submit(_run_xgboost, "", claim_id, consolidated_features)
+        f_iso = executor.submit(_run_isolation_forest, "", claim_id, consolidated_features)
+        f_graph = executor.submit(_run_graph, "", claim_id, claim.patient_ref, claim.provider_ref)
+        f_emb = executor.submit(_run_embedding, "", claim_id)
         
-        # Build feature vector for this single claim
-        # We need to map procedure_code to the one-hot columns
-        feat_dict = {f: 0 for f in features}
-        if "billed_amount" in feat_dict:
-            feat_dict["billed_amount"] = claim.billed_amount
-        proc_col = f"procedure_code_{claim.procedure_code}"
-        if proc_col in feat_dict:
-            feat_dict[proc_col] = 1
+        for future in concurrent.futures.as_completed([f_xgb, f_iso, f_graph, f_emb]):
+            try:
+                results.append(future.result())
+            except Exception as e:
+                logger.error(f"Parallel AI task failed: {e}")
+
+    # Process AI Results
+    df_feat_for_shap = None
+    for res in results:
+        if not res: continue
+        if res.get("type") == "xgboost":
+            db.add(ModelScore(claim_id=claim_id, model_type="xgboost", score=res["score"]))
+            for feat, val in res.get("shap", []):
+                db.add(ShapExplanation(claim_id=claim_id, feature=feat, contribution_value=val))
+        elif res.get("type") == "isolation_forest":
+            db.add(ModelScore(claim_id=claim_id, model_type="isolation_forest", score=res["score"]))
             
-        df_feat = pd.DataFrame([feat_dict])
-        
-        xgb_pred = float(xgb_model.predict_proba(df_feat)[0][1])
-        iso_pred = float(iso_model.decision_function(df_feat)[0]) # anomaly score
-        
-        # Save scores
-        db.add(ModelScore(claim_id=claim_id, model_type="xgboost", score=xgb_pred))
-        db.add(ModelScore(claim_id=claim_id, model_type="isolation_forest", score=iso_pred))
-        db.commit()
-        
-        # 3. Explainability (SHAP)
-        explainer = shap.TreeExplainer(xgb_model)
-        shap_values = explainer.shap_values(df_feat)
-        for i, col in enumerate(features):
-            val = float(shap_values[0][i])
-            if abs(val) > 0.01: # only store significant features
-                db.add(ShapExplanation(claim_id=claim_id, feature=col, contribution_value=val))
-        db.commit()
-    except Exception as e:
-        logger.error(f"ML step failed: {e}")
+    db.commit()
 
-    # 4. Duplicate Match (RapidFuzz)
-    try:
-        past_claims = db.query(Claim).filter(Claim.id != claim_id).limit(100).all()
-        for pc in past_claims:
-            if claim.procedure_code == pc.procedure_code:
-                sim = rapidfuzz.fuzz.ratio(str(claim.billed_amount), str(pc.billed_amount))
-                if sim > 95:
-                    db.add(DuplicateMatch(claim_id=claim_id, matched_claim_id=pc.id, similarity_score=sim, method="fuzzy"))
-        db.commit()
-    except Exception as e:
-        logger.error(f"Duplicate step failed: {e}")
-
-    # 4b. Graph Relationship (NetworkX)
-    try:
-        # Simple extraction: patient and provider relationship
-        # In a real app we'd build the graph in-memory, detect cliques/hubs, then save
-        G = nx.Graph()
-        G.add_edge(claim.patient_ref, claim.provider_ref, claim_id=claim_id)
-        # Store relationships based on this claim
-        db.add(GraphRelationship(
-            entity_1=claim.patient_ref, 
-            entity_2=claim.provider_ref, 
-            relationship_type="PATIENT_PROVIDER", 
-            metadata_json={"claim_id": claim_id}
-        ))
-        db.commit()
-    except Exception as e:
-        logger.error(f"Graph step failed: {e}")
-
-    # 4c. Procedure & Code Validation
-    try:
-        from .validation_service import run_procedure_validation
-        run_procedure_validation(db, claim_id)
-    except Exception as e:
-        logger.error(f"Procedure validation failed: {e}")
-        db.rollback()
-
-    # 5. LLM Helper
+    # 4. LLM Helper
     if settings.GEMINI_API_KEY:
         try:
             import google.generativeai as genai
             genai.configure(api_key=settings.GEMINI_API_KEY)
             model = genai.GenerativeModel('gemini-1.5-flash')
-            prompt = f"Summarize healthcare claim {claim.id} for patient {claim.patient_ref} with billed amount {claim.billed_amount}."
+            
+            # Richer prompt combining new features
+            prompt = (
+                f"Summarize healthcare claim {claim.id} for patient {claim.patient_ref} "
+                f"with billed amount {claim.billed_amount}.\n"
+                f"Features gathered: {list(consolidated_features.keys())[:10]}...\n"
+                f"Identify potential issues based on validation, duplicates, and benchmarks without stating definitive fraud."
+            )
             response = model.generate_content(prompt)
         except Exception as e:
             logger.error(f"LLM Helper failed: {e}")
 
-    # 6. Generate Hybrid Embeddings
-    try:
-        from .embedding_service import generate_claim_embedding
-        generate_claim_embedding(db, claim_id)
-    except Exception as e:
-        logger.error(f"Embedding generation failed: {e}")
-        db.rollback()
-
-    # 7. Risk Aggregation
+    # 5. Risk Aggregation & Evidence Coverage
     try:
         from .aggregation_service import generate_risk_aggregate
         generate_risk_aggregate(db, claim_id)
+        
+        # Calculate Evidence Coverage
+        agg = db.query(RiskAggregate).filter_by(claim_id=claim_id).first()
+        if agg:
+            coverage = 0.0
+            total_signals = 6.0
+            if consolidated_features.get("provider_status") == 1: coverage += 1
+            if consolidated_features.get("benchmark_status") == 1: coverage += 1
+            if consolidated_features.get("procedure_valid") == 1: coverage += 1
+            if doc and doc.ocr_text: coverage += 1
+            if len(results) >= 4: coverage += 2 # ML & Graph ran
+            
+            agg.evidence_coverage = coverage / total_signals
+            db.commit()
     except Exception as e:
         logger.error(f"Risk aggregation failed: {e}")
-        db.rollback()
 
-    # Mark as ready for investigation
-    claim.status = "action_required"
+    # 6. Case Routing
+    agg = db.query(RiskAggregate).filter_by(claim_id=claim_id).first()
+    if agg:
+        # Route based on Risk Thresholds (using config)
+        from .aggregation_service import get_active_weights
+        
+        if agg.aggregate_score > 0.75:
+            claim.status = "action_required" # High Risk
+        elif agg.aggregate_score > 0.4:
+            claim.status = "manual_review" # Medium Risk
+        elif consolidated_features.get("procedure_valid") == 0:
+            claim.status = "rejected" # Hard fail
+        else:
+            claim.status = "approved" # Low Risk Auto-adjudicate
+    else:
+        claim.status = "action_required"
+
     audit = AuditLog(action="PIPELINE_COMPLETE", entity_type="CLAIM", entity_id=str(claim_id))
     db.add(audit)
     db.commit()

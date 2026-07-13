@@ -57,7 +57,7 @@ describe('E2E Lifecycle: Submit -> Investigate -> Assign', () => {
     // 1. Verify Claims List loaded
     await waitFor(() => {
       expect(screen.getByText('Claims Register')).toBeInTheDocument();
-      expect(screen.getByText('#101')).toBeInTheDocument();
+      expect(screen.getByText('101')).toBeInTheDocument();
     });
 
     // 2. Click "View Details" (We simulate navigation by manually changing the router or just rendering the ClaimDetail component)

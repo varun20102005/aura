@@ -93,7 +93,7 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
     db.add(audit)
     db.commit()
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "role": user.role}
 
 class TOTPVerify(BaseModel):
     code: str

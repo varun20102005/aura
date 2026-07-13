@@ -12,6 +12,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class Token(BaseModel):
     access_token: str
     token_type: str
+    role: Optional[str] = None
 
 class TokenData(BaseModel):
     email: Optional[str] = None
