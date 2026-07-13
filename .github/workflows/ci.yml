@@ -9,7 +9,7 @@ on:
 jobs:
   backend-test:
     name: Backend Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     services:
       postgres:
@@ -39,7 +39,7 @@ jobs:
       - name: Install system dependencies for OCR
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr libtesseract-dev libgl1
+          sudo apt-get install -y tesseract-ocr libtesseract-dev libgl1-mesa-glx
 
       - name: Install Python dependencies
         working-directory: ./backend
@@ -58,7 +58,7 @@ jobs:
 
   frontend-test-and-build:
     name: Frontend Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
       - name: Checkout repository
