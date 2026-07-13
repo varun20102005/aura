@@ -75,8 +75,11 @@ def test_comprehensive_e2e_lifecycle(client, db):
     agg = db.query(RiskAggregate).filter_by(claim_id=claim_id).first()
     assert agg is not None, "Step 4 Failed: RiskAggregate not populated"
     
-    graph = db.query(GraphRelationship).filter_by(entity_1="PAT_E2E_01", entity_2="PROV_E2E_01").first()
+    from app.database import SessionLocal
+    fresh_db = SessionLocal()
+    graph = fresh_db.query(GraphRelationship).filter_by(entity_1="PAT_E2E_01", entity_2="PROV_E2E_01").first()
     assert graph is not None, "Step 4 Failed: GraphRelationship not populated"
+    fresh_db.close()
     
     # SHAP only populated if features are significant
     shap_ex = db.query(ShapExplanation).filter_by(claim_id=claim_id).all()

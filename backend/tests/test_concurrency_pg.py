@@ -53,6 +53,13 @@ def add_note_concurrently(claim_id, note_text):
 def test_concurrent_note_creation():
     """Verify concurrent inserts to child tables avoid race conditions."""
     db = SessionLocal()
+    
+    from app.models.core import User
+    u = db.query(User).filter_by(id=1).first()
+    if not u:
+        u = User(id=1, email="test_author@test.com", hashed_password="pw", role="Officer")
+        db.add(u)
+    
     c = Claim(patient_ref="PAT_NOTE", provider_ref="PRV", procedure_code="123", billed_amount=100)
     db.add(c)
     db.commit()
